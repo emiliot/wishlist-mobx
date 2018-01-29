@@ -1,12 +1,59 @@
-import React from "react"
-import { observer } from "mobx-react"
+import React, { Component } from "react";
+import { observer } from "mobx-react";
+import { clone, getSnapshot, applySnapshot } from "mobx-state-tree";
 
-const WishListItemView = ({ item }) => (
-    <li className="item">
-        {item.image && <img src={item.image} alt={'wishlist item'} />}
+import WishListItemEdit from "../wishListItemEdit";
+
+class WishListItemView extends Component {
+  constructor() {
+    super()
+    this.state = { isEditing : false }
+  }
+  render() {
+    const { item } = this.props;
+    return this.state.isEditing ? (
+      this.renderEditable()
+    ) : (
+      <li className="item">
+        {item.image && <img src={item.image} alt={"wishlist item"} />}
         <h3>{item.name}</h3>
         <span>{item.price}</span>
-    </li>
-)
+        <span>
+          <button onClick={this.onToggleEdit}>✏</button>
+        </span>
+      </li>
+    )
+  }
 
-export default observer(WishListItemView)
+  renderEditable () {
+    return (
+      <li className="item">
+        <WishListItemEdit item={this.state.clone} />
+        <button onClick={this.onSaveEdit}>💾</button>
+        <button onClick={this.onCancelEdit}>❎</button>
+      </li>
+    )
+  }
+
+  onToggleEdit = () => {
+    this.setState({ 
+      isEditing: true,
+      clone: clone(this.props.item)
+    })
+  }
+
+  onSaveEdit = () => {
+    applySnapshot(this.props.item, getSnapshot(this.state.clone))
+
+    this.setState({
+      isEditing: false,
+      clone: null
+    })
+  }
+
+  onCancelEdit = () => {
+    this.setState({ isEditing: false, clone: null })
+  }
+}
+
+export default observer(WishListItemView);

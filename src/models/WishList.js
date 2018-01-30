@@ -1,34 +1,44 @@
-import { types } from 'mobx-state-tree'
+import {
+  types,
+  getParent,
+  destroy
+} from "mobx-state-tree";
 
 export const WishListItem = types
-    .model({
-        name: types.string,
-        price: types.number,
-        image: ""
-    })
-    .actions(self => ({
-        changeName(newName){
-            self.name = newName
-        },
-        changeImage(newImage){
-            self.image = newImage
-        },
-        changePrice(newPrice){
-            self.price = newPrice
-        }
-    }))
+  .model({
+    name: types.string,
+    price: types.number,
+    image: ""
+  })
+  .actions(self => ({
+    changeName(newName) {
+      self.name = newName;
+    },
+    changeImage(newImage) {
+      self.image = newImage;
+    },
+    changePrice(newPrice) {
+      self.price = newPrice;
+    },
+    remove() {
+      getParent(self, 2).remove(self)
+    }
+  }));
 
 export const WishList = types
-.model({
+  .model({
     items: types.optional(types.array(WishListItem), [])
-})
-.actions(self => ({
+  })
+  .actions(self => ({
     add(item) {
-        self.items.push(item)
+      self.items.push(item);
+    },
+    remove(item) {
+      destroy(item)
     }
-}))
-.views(self => ({
+  }))
+  .views(self => ({
     get totalPrice() {
-        return self.items.reduce((sum, next) => sum + next.price, 0)
+      return self.items.reduce((sum, next) => sum + next.price, 0);
     }
-}))
+  }));

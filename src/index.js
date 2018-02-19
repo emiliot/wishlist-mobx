@@ -3,38 +3,58 @@ import ReactDOM from "react-dom";
 import "./index.css";
 import App from "./App";
 import registerServiceWorker from "./registerServiceWorker";
-import { onSnapshot } from "mobx-state-tree";
+import { onSnapshot, getSnapshot } from "mobx-state-tree";
 
-import { WishList } from "./models/WishList";
+import { Group } from "./models/Group";
 
 let initialState = {
-  items: [
-    {
-      name: "LEGO Mindstorms EV3",
-      price: 349.95,
-      image:
-        "https://images-na.ssl-images-amazon.com/images/I/71CpQw%2BufNL._SL1000_.jpg"
+  users: {
+    a342: {
+        id: "a342",
+        name: "Homer",
+        gender: "m"
     },
-    {
-      name: "Miracles - C.S. Lewis",
-      price: 12.91,
-      image:
-        "https://images-na.ssl-images-amazon.com/images/I/51a7xaMpneL._SX329_BO1,204,203,200_.jpg"
+    "5fc2": {
+        id: "5fc2",
+        name: "Marge",
+        gender: "f"
+    },
+    "663b": {
+        id: "663b",
+        name: "Bart",
+        gender: "m"
+    },
+    "65aa": {
+        id: "65aa",
+        name: "Maggie",
+        gender: "f"
+    },
+    ba32: {
+        id: "ba32",
+        name: "Lisa",
+        gender: "f"
     }
-  ]
-};
-
-if (localStorage.getItem("wishlistapp")) {
-  const json = JSON.parse(localStorage.getItem("wishlistapp"));
-  if (WishList.is(json)) {
-    initialState = json;
   }
 }
 
-const wishList = WishList.create(initialState);
-onSnapshot(wishList, snapshot => {
-  localStorage.setItem("wishlistapp", JSON.stringify(snapshot));
-});
+let group = Group.create(initialState)
+function renderApp () {
+  ReactDOM.render(<App group={group} />, document.getElementById("root"))
+}
 
-ReactDOM.render(<App wishList={wishList} />, document.getElementById("root"));
-registerServiceWorker();
+renderApp()
+
+if (module.hot) {
+  module.hot.accept(["./App"], () => {
+    // new components
+    renderApp()
+  })
+
+  module.hot.accept(["./models/Group"], () => {
+    // new model definitions
+    const snapshot = getSnapshot(group)
+    group = Group.create(snapshot)
+    renderApp()
+  })
+}
+registerServiceWorker()

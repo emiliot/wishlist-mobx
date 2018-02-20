@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import { observer } from 'mobx-react'
 import logo from './logo.svg'
 import './App.css'
 import WishListView from './components/wishListView'
@@ -31,7 +32,8 @@ class App extends Component {
               </option>
             ))}
           </select>
-          {selectedUser && <WishListView wishList={selectedUser.wishList} />}
+          <button onClick={group.drawLots}>Draw lots</button>
+          {selectedUser && <User user={selectedUser} />}
         </main>
       </div>
     );
@@ -41,5 +43,15 @@ class App extends Component {
     this.setState({ selectedUser: event.target.value })
   }
 }
+
+const User = observer(({ user }) => (
+  <div>
+    <WishListView wishList={user.wishList} />
+    <button onClick={user.getSuggestions}>Suggestions</button>
+    <hr />
+    <h2>{user.recipient ? user.recipient.name : ""}</h2>
+    {user.recipient && <WishListView wishList={user.recipient.wishList} readonly />}
+  </div>
+))
 
 export default App;

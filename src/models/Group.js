@@ -1,5 +1,4 @@
-import { types, flow, getParent } from "mobx-state-tree"
-
+import { types, flow, applySnapshot } from "mobx-state-tree"
 import { WishList } from "./WishList"
 
 const User = types.model({
@@ -9,11 +8,6 @@ const User = types.model({
   wishList: types.optional(WishList, {}),
   recipient: types.maybe(types.reference(types.late(() => User)))
 })
-.views(self => ({
-  get other() {
-    return getParent(self).get(self.recipient)
-  }
-}))
 .actions(self => ({
   getSuggestions: flow(function* () {
     const response = yield window.fetch(`http://localhost:3001/suggestions_${self.gender}`)
@@ -26,6 +20,14 @@ export const Group = types.model({
   users: types.map(User)
 })
 .actions(self => ({
+  afterCreate() {
+    self.load()
+  },
+  load: flow(function* load() {
+    const response = yield window.fetch(`http://localhost:3001/users`)
+    const users = yield response.json()
+    applySnapshot(self.users, users)
+  }),
   drawLots() {
     const allUsers = self.users.values()
 

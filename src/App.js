@@ -5,10 +5,6 @@ import './App.css'
 import WishListView from './components/wishListView'
 
 class App extends Component {
-  static defaultProps = {
-    group: {}
-  }
-
   constructor(props) {
     super()
     this.state = { selectedUser: null }
@@ -54,4 +50,4 @@ const User = observer(({ user }) => (
   </div>
 ))
 
-export default App;
+export default observer(App);
